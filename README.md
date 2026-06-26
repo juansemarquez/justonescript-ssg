@@ -226,6 +226,27 @@ async function compartir(url) {
 
 You can add more JS files via `js_include` in your `.config.py`.
 
+## CSS and other static assets
+
+Within the `assets` directory, you can modify/add whatever CSS you want. The
+default settings are the ones I use for my blog. Feel free to replace
+everything. I tend to download files instead of linking CDNs, but that's up to
+you.
+
+The default options are:
+
+- bootstrap (you can replace it for CDN), as explained in
+  [https://getbootstrap.com/](https://getbootstrap.com/)
+- `blog.css` custom CSS. Delete / replace it by whatever you want. Every css
+  you add should be added to the list in `css_include`, in your `.config.py`
+file.
+- `img` subdirectory has images for licenses and example pictures.
+- `share.js` has custom javascript for the "Share" button. You can add as many
+custom javascript files as you want via `js_include` in `.config.py`.
+- Some code highlighting files, thanks to
+  [highlight.js](https://highlightjs.org/). I include the programming languages
+I use, but you can add/remove whatever you want.
+
 ## License
 
 MIT License. See `LICENSE`.
