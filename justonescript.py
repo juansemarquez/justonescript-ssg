@@ -250,6 +250,7 @@ def git_changed_files(pattern="*.md") -> set[str]:
             if " -> " in fname:
                 fname = fname.split(" -> ")[-1]
             changed.add(fname)
+            changed.add(Path(fname).name)
         return changed
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None   # caller will treat None as "rebuild everything"
