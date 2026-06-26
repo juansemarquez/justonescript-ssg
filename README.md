@@ -1,4 +1,4 @@
-# justonescript
+# justOneScript Static Site Generator
 
 A single-script static blog generator written in Python. Inspired by
 [bashblog](https://github.com/cfenollosa/bashblog), but with Python,
