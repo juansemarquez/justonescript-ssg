@@ -223,7 +223,7 @@ def md_to_html(md_text: str) -> str:
     """Convert Markdown to HTML using the `markdown` library with useful extensions."""
     return markdown.markdown(
         md_text,
-        extensions=["fenced_code", "tables", "attr_list", "def_list", "footnotes"],
+        extensions=["fenced_code", "tables", "attr_list", "def_list", "footnotes", "sane_lists"],
     )
 
 # ---------------------------------------------------------------------------
