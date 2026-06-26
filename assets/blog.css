@@ -1,0 +1,100 @@
+#title{font-size: x-large; width: 90%; margin: 0px auto;}
+a.ablack{color:black !important;}
+li{margin-bottom:8px;}
+ul,ol{margin-left:24px;margin-right:24px;}
+#all_posts{margin-top:24px;text-align:center;}
+.subtitle{font-size:small;margin:12px 0px;}
+.content p{margin-left:24px;margin-right:24px; text-align: justify;}
+h1{margin-bottom:12px !important; font-family: sans-serif; font-size: 5rem;}
+#description{font-size:large;margin-bottom:12px;}
+h3{margin-top:42px;margin-bottom:8px;font-family: "kaushan", sans-serif; font-size: 2em;}
+h4{margin-left:24px;margin-right:24px;}
+img{max-width:100%;}
+#twitter{line-height:20px;vertical-align:top;text-align:right;font-style:italic;color:#333;margin-top:24px;font-size:14px;}
+blockquote{background-color:#f9f9f9;border-left:solid 4px #e9e9e9;margin-left:12px;padding:12px 12px 12px 24px;}
+blockquote img{margin:12px 0px;}
+blockquote iframe{margin:12px 0px;}
+body { background-color: #fffbec; }
+.jumbotron { background-color: #fffbec; }
+div.figure {
+    text-align: center;
+    display:block;
+}
+figure {
+    display: inline-block;
+    padding: 10px;
+    margin: 5px auto;
+    text-align: center;
+    box-shadow: 15px 15px 5px gray;
+    border: solid 1px black;
+    border-radius: 20px;
+    background-color: white;
+}
+figcaption {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+#social a img {
+    width: 30px;
+}
+.license {
+    text-align: right !important;
+    font-size: small;
+    margin-bottom: 50px;
+}
+p.button {
+    margin: 20px;
+    text-align: center;
+}
+
+.cover-img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+.article-desc {
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-left: 4px solid #003366;
+}
+.image-credits {
+    font-size: 0.85rem;
+    color: #666; margin-top: 0.5rem;
+}
+.image-credit a {
+    color: #003366;
+    text-decoration: none;
+    border-bottom: 1px dotted #003366;
+}
+.post-cover img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+.post-excerpt { padding: 1rem 0; }
+.post-desc { color: #555; }
+.cover-figure {
+    margin: 2rem 0;
+    text-align: center;
+}
+.cover-figure img.cover-img { margin-bottom: 0.5rem; }
+.cover-caption {
+    font-size: 0.85rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 0.25rem;
+    padding: 0 1rem;
+}
+.cover-caption a {
+    color: #003366;
+    text-decoration: none;
+    border-bottom: 1px dotted #003366;
+}
