@@ -25,8 +25,8 @@ Python 3.11+ recommended.
 ## Installation
 
 ```bash
-git clone https://github.com/youruser/justonescript
-cd justonescript
+git clone https://github.com/juansemarquez/justonescript-ssg
+cd justonescript-ssg
 cp .config.example.py .config.py
 # edit .config.py with your blog's data
 ```

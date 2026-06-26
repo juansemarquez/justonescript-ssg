@@ -34,6 +34,9 @@ import markdown               # pip install markdown
 # Default configuration
 # ---------------------------------------------------------------------------
 DEFAULTS = {
+    "global_software_name": "JustOneScript SSG",
+    "global_software_url": "https://github.com/juansemarquez/justonescript-ssg",
+    "global_software_version": "0.1",
     "global_title": "My Blog",
     "global_description": "A blog",
     "global_url": "http://example.com/blog",
@@ -326,7 +329,7 @@ def load_or_build_footer(cfg: dict) -> str:
 
 def build_footer(cfg: dict) -> str:
     software_name = cfg.get('global_software_name', 'JustOneScript SSG');
-    software_url = cfg.get('global_software_url', 'https://github.com/juansemarquez/justonescript');
+    software_url = cfg.get('global_software_url', 'https://github.com/juansemarquez/justonescript-ssg');
     return (
         f'<div id="footer" class=\'text-center small text-light bg-dark\'>'
         f'{cfg["global_license"]}\n'

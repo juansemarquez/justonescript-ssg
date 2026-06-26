@@ -1,5 +1,5 @@
 global_software_name="JustOneScript SSG"
-global_software_url="https://github.com/juansemarquez/justonescript"
+global_software_url="https://github.com/juansemarquez/justonescript-ssg"
 global_software_version="0.1"
 
 # Blog title
