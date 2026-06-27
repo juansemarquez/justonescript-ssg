@@ -123,7 +123,6 @@ description_on_article: true
 cover_image: "img/my-photo.png"
 cover_caption: "A caption for the cover image"
 
-image_credits: "Photo: Author Name|https://example.com"
 image_credits:
     - text: "First image"
       url: "https://url1.com"
