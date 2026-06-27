@@ -124,7 +124,11 @@ cover_image: "img/my-photo.png"
 cover_caption: "A caption for the cover image"
 
 image_credits: "Photo: Author Name|https://example.com"
-image_credits: "First image|https://url1.com;Second image|https://url2.com"
+image_credits:
+    - text: "First image"
+      url: "https://url1.com"
+    - text: "Second image"
+      url: "https://url2.com"
 tags: ["tag1", "tag2", ...]
 ----
 
@@ -142,7 +146,7 @@ Post body...
 | `description_on_article` | No | `true` to repeat the excerpt at the top of the post. Default: `false`. |
 | `cover_image` | No | Path to cover image (relative to the blog root). |
 | `cover_caption` | No | Caption shown below the cover image. |
-| `image_credits` | No | Credits for images, in order of appearance. Format: `"Text\|URL;Text\|URL"`. |
+| `image_credits` | No | Credits for images, in order of appearance. Format: YAML list. |
 | `tags` | No | Tags for the post. Python list or comma-separated string. |
 
 

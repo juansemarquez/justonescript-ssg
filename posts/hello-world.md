@@ -7,7 +7,11 @@ description: |
 description_on_article: false
 cover_image: "img/wave.jpg"
 cover_caption: "Cover image - Hello from justonescript SSG"
-image_credits: "The Great Wave off Kanagawa, by Katsushika Hokusai (Public Domain)|https://commons.wikimedia.org/wiki/File:The_Great_Wave_off_Kanagawa.jpg;Smiley (Pumbaa80, Public domain, via Wikimedia Commons)|https://commons.wikimedia.org/wiki/File:Smiley.svg"
+image_credits:
+    - text: "The Great Wave off Kanagawa, by Katsushika Hokusai (Public Domain)"
+      url: "https://commons.wikimedia.org/wiki/File:The_Great_Wave_off_Kanagawa.jpg"
+    - text: "Smiley (Pumbaa80, Public domain, via Wikimedia Commons)"
+      url: "https://commons.wikimedia.org/wiki/File:Smiley.svg"
 tags: ["example", "markdown", "justonescript"]
 ----
 

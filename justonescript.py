@@ -388,24 +388,28 @@ def build_cover_block(fm: dict) -> str:
 # ---------------------------------------------------------------------------
 
 def build_credits_block(fm: dict, cfg :dict) -> str:
-    credits_raw = fm.get("image_credits", "")
-    if not credits_raw:
+    credits = fm.get("image_credits", [])
+    if not credits:
         return ""
-    # Format: "Text|URL;anotherText|anotherURL"
+
     items = []
-    for item in credits_raw.split(";"):
-        item = item.strip()
-        if "|" in item:
-            text, url = item.split("|", 1)
-            items.append(f'<a href="{url.strip()}">{text.strip()}</a>')
+    for item in credits:
+        if isinstance(item, dict):
+            text = item.get("text", "")
+            url = item.get("url", "")
+            if url:
+                items.append(f'<a href="{url}">{text}</a>')
+            else:
+                items.append(text)
         else:
-            items.append(item)
+            # fallback: plain string
+            items.append(str(item))
+
     if len(items) == 1:
         msg = cfg.get("template_image_credits_singular", "Image credits") + ": "
     else:
         msg = cfg.get("template_image_credits_plural", "Image credits") + ": "
     return "<p><small>" + msg + " &mdash; ".join(items) + "</small></p>\n"
-
 
 # ---------------------------------------------------------------------------
 # Parse pub_date from frontmatter
