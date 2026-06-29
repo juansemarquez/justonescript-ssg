@@ -65,7 +65,19 @@ body_end_file=""
 body_begin_file_index=""
 # CSS files to include on every page, f.ex. css_include=['main.css','blog.css']
 # leave empty to use generated
-css_include=['main.css', 'blog.css']
+css_include=['main.css', 'blog.css', 'highlight/default.min.css']
+
+# javascript files to be included in every page
+js_include = [
+        "share.js",
+        "highlight/highlight.min.js",
+        "highlight/bash.min.js",
+        "highlight/php.min.js",
+        "highlight/python.min.js",
+        "highlight/yaml.min.js",
+        "highlight/highlightAll.js",
+]
+
 # HTML files to exclude from index, f.ex. post_exclude=['imprint.html','aboutme.html']
 html_exclude=[]
 
@@ -96,8 +108,8 @@ template_subscribe_browser_button="Subscribe"
 template_image_credits_singular="Image credits"
 template_image_credits_plural="Image credits"
 
-# javascript files to be included in every page
-js_include = ["share.js"]
+# Text to be shown in the "Share" button
+template_share_text = "Share"
 
 # The locale to use for the dates displayed on screen
 date_format="%d/%m/%Y"

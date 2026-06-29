@@ -45,13 +45,11 @@ DEFAULTS = {
     "posts_dir": "posts",
     "output_dir": "output",
     "assets_dir": "assets",
-    "global_license": [
-        '<a class="text-warning" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>'
+    "global_license": '<a class="text-warning" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>'
         '<img src="img/licenses/cc.svg" alt="cc" style="max-width:1em;max-height:1em;margin-left:.2em;">'
         '<img src="img/licenses/by.svg" alt="by" style="max-width:1em;max-height:1em;margin-left:.2em;">'
         '<img src="img/licenses/nc.svg" alt="nc" style="max-width:1em;max-height:1em;margin-left:.2em;">'
-        '<img src="img/licenses/sa.svg" alt="sa" style="max-width:1em;max-height:1em;margin-left:.2em;">'
-    ],
+        '<img src="img/licenses/sa.svg" alt="sa" style="max-width:1em;max-height:1em;margin-left:.2em;">',
     "global_twitter_username": "",
     "mastodon_account": "",
     "twitter_account": "",
@@ -68,7 +66,7 @@ DEFAULTS = {
     "body_begin_file_index": "",
     "number_of_index_articles": "8",
     "number_of_feed_articles": "10",
-    "css_include": ["bootstrap.min.css","blog.css","highlight/styles/monokai.css"],
+    "css_include": ["bootstrap.min.css","blog.css","highlight/default.min.css"],
     "date_format": "%d/%m/%Y",
     "date_locale": "es_AR.UTF-8",
     "non_blogpost_files": [],
@@ -83,7 +81,16 @@ DEFAULTS = {
     "template_subscribe": "Subscribe (RSS)",
     "template_subscribe_browser_button": "Subscribe",
     "template_tags_line_header": "Tags:",
-    "js_include": ["share.js"],
+    "js_include": [
+        "share.js",
+        "highlight/highlight.min.js",
+        "highlight/bash.min.js",
+        "highlight/php.min.js",
+        "highlight/python.min.js",
+        "highlight/yaml.min.js",
+        "highlight/highlightAll.js",
+    ],
+    "template_share_text": "Share",
 }
 
 # ---------------------------------------------------------------------------
@@ -279,7 +286,7 @@ def build_head(cfg: dict, page_title: str, twitter_meta: str = "") -> str:
     js_files = cfg.get("js_include", [])
     if isinstance(js_files, str):
         js_files = js_files.split()
-    js_tags = "".join(f'<script src="{f}"></script>\n' for f in js_files)
+    js_tags = "".join(f'<script defer src="{f}"></script>\n' for f in js_files)
 
     return (
         "<!DOCTYPE html>\n<html><head>\n"
@@ -288,13 +295,6 @@ def build_head(cfg: dict, page_title: str, twitter_meta: str = "") -> str:
         + css_links
         + f'<link rel="alternate" type="application/rss+xml" '
         f'title="{cfg["template_subscribe_browser_button"]}" href="{cfg["blog_feed"]}" />\n'
-        '<script src="highlight/highlight.pack.js"></script>\n'
-        "<script src='highlight/highlight.min.js'></script>\n"
-        "<script src='highlight/bash.min.js'></script>\n"
-        "<script src='highlight/php.min.js'></script>\n"
-        "<script src='highlight/python.min.js'></script>\n"
-        "<script src='highlight/yaml.min.js'></script>\n"
-        "<script defer>hljs.initHighlightingOnLoad();</script>\n"
         + twitter_meta
         + f"<title>{page_title}</title>\n"
         + js_tags
@@ -358,11 +358,11 @@ def build_twitter_card(cfg: dict, title: str, description: str, image_url: str =
     return meta
 
 
-def share_button(url: str) -> str:
+def share_button(url: str, share_text: str) -> str:
     return (
         f"<p id='twitter'>\n"
         f"<button class='btn btn-primary' onclick='compartir(\"{url}\");'>"
-        "Compartir / Share</button></p>\n"
+        f"{share_text}</button></p>\n"
     )
 
 
@@ -616,7 +616,7 @@ def build_post_html(
         + "<!-- text begin -->\n"
         + content_html
         + "\n<!-- text end -->\n"
-        + share_button(post_url)
+        + share_button(post_url, cfg["template_share_text"])
         + "<!-- entry end -->\n"
         + "</div>\n"
         + body_end
@@ -664,7 +664,7 @@ def build_index_entry(cfg: dict, slug: str, title: str, date_str: str, excerpt_h
     if cover_html:
         entry += cover_html + "\n"
     entry += read_more
-    entry += share_button(post_url)
+    entry += share_button(post_url, cfg["template_share_text"])
     return entry
 
 # ---------------------------------------------------------------------------
