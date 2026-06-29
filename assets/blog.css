@@ -98,3 +98,7 @@ p.button {
     text-decoration: none;
     border-bottom: 1px dotted #003366;
 }
+#footer {
+    padding: 10px;
+    border-radius: 20px;
+}
