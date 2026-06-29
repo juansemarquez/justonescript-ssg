@@ -83,8 +83,9 @@ your-blog/
         └── ...
 ```
 
-Generated files (`*.html`, `feed.rss`) are written to the same directory as
-the `.md` files. Add them to `.gitignore` if you track posts in the same repo.
+Generated files (`*.html`, `feed.rss`) are written to a specific directory,
+named `output` by default. The `.md` files go in a different folder, `posts` by
+default.
 
 ## Writing posts
 
