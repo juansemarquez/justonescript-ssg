@@ -96,6 +96,7 @@ Each post is a `.md` file with a frontmatter block at the top, delimited by `---
 ```markdown
 ----
 title: "Mi first post"
+slug: "my-first-post"
 pub_date: "2025-06-01 10:00"
 tags: ["example", "first"]
 ----
@@ -109,6 +110,8 @@ Post body goes here. Plain **Markdown**.
 ```markdown
 ----
 title: "The title of the post"
+
+slug: "the-title-of-the-post"
 
 pub_date: "2025-06-01 10:00"
 
@@ -141,6 +144,7 @@ Post body...
 | Field | Required | Description |
 |---|---|---|
 | `title` | Yes | Post title. Falls back to first line in the body. |
+| `slug` | Yes | The url of the post, without the ".html". Falls back to title, replacing spaces with '-'. |
 | `pub_date` | No | Publication date (`"YYYY-MM-DD HH:MM"`). Falls back to file mtime. |
 | `description` | No | Excerpt shown on index, tag pages, and RSS. Supports Markdown. |
 | `description_on_article` | No | `true` to repeat the excerpt at the top of the post. Default: `false`. |

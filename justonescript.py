@@ -704,29 +704,33 @@ def collect_posts(cfg: dict) -> list[dict]:
     newest-first by pub_date.
     """
     posts = []
+    slugs = []
     posts_dir = Path(cfg.get("posts_dir", "posts"))
     for md_path in sorted(posts_dir.glob("*.md")):
         fm, body_md, title, tags = parse_frontmatter(md_path)
         if not title:
             continue
         pub_date = parse_pub_date(fm, md_path, cfg)
-        slug_base = title_to_slug(title)
+        slug_base = fm.get("slug") or title_to_slug(title)
         slug = slug_base + ".html"
         # Avoid collisions — deterministic: use md stem if it already looks like a slug
         if md_path.stem != md_path.stem.replace(" ", "-"):
             slug = md_path.stem + ".html"
-        posts.append(
-            {
-                "md_path": md_path,
-                "slug": slug,
-                "title": title,
-                "tags": tags,
-                "pub_date": pub_date,
-                "fm": fm,
-                "body_md": body_md,
-                "date_str": fmt_date(pub_date, cfg),
-            }
-        )
+        new_post = {
+            "md_path": md_path,
+            "slug": slug,
+            "title": title,
+            "tags": tags,
+            "pub_date": pub_date,
+            "fm": fm,
+            "body_md": body_md,
+            "date_str": fmt_date(pub_date, cfg),
+        }
+        if new_post["slug"] in slugs:
+            raise Exception(f"ERROR: Repeated slug: {new_post['slug']} Post: {new_post['md_path']}.")
+        slugs.append(new_post["slug"])
+        posts.append(new_post)
+
     posts.sort(key=lambda p: p["pub_date"], reverse=True)
     return posts
 

@@ -1,5 +1,6 @@
 ----
 title: "Hello, World!"
+slug: "hello-world"
 pub_date: "2025-01-01 12:00"
 description: |
   This is a sample post for **justonescript**, a single-script static blog
