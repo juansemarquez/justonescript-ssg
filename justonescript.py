@@ -90,6 +90,7 @@ DEFAULTS = {
         "highlight/yaml.min.js",
         "highlight/highlightAll.js",
     ],
+    "include_share_button": True,
     "template_share_text": "Share",
 }
 
@@ -604,6 +605,10 @@ def build_post_html(
     body_begin = optional_file_content(cfg.get("body_begin_file", ""))
     body_end = optional_file_content(cfg.get("body_end_file", ""))
 
+    share_button_code = ""
+    if cfg["include_share_button"]:
+        share_button_code = share_button(post_url, cfg["template_share_text"])
+
     html = (
         head
         + "\n<body class=container>\n"
@@ -616,7 +621,7 @@ def build_post_html(
         + "<!-- text begin -->\n"
         + content_html
         + "\n<!-- text end -->\n"
-        + share_button(post_url, cfg["template_share_text"])
+        + share_button_code
         + "<!-- entry end -->\n"
         + "</div>\n"
         + body_end
@@ -664,7 +669,10 @@ def build_index_entry(cfg: dict, slug: str, title: str, date_str: str, excerpt_h
     if cover_html:
         entry += cover_html + "\n"
     entry += read_more
-    entry += share_button(post_url, cfg["template_share_text"])
+
+    if cfg["include_share_button"]:
+        entry += share_button(post_url, cfg["template_share_text"])
+
     return entry
 
 # ---------------------------------------------------------------------------

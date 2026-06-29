@@ -78,6 +78,13 @@ js_include = [
         "highlight/highlightAll.js",
 ]
 
+# Include "Share" button ("share.js" should be present on js_include, unless
+# you have customized/renamed the script).
+include_share_button = True
+# Text to be shown in the "Share" button.
+template_share_text = "Share"
+
+
 # HTML files to exclude from index, f.ex. post_exclude=['imprint.html','aboutme.html']
 html_exclude=[]
 
@@ -107,9 +114,6 @@ template_subscribe_browser_button="Subscribe"
 # "Image credits" text, singular and plural
 template_image_credits_singular="Image credits"
 template_image_credits_plural="Image credits"
-
-# Text to be shown in the "Share" button
-template_share_text = "Share"
 
 # The locale to use for the dates displayed on screen
 date_format="%d/%m/%Y"
