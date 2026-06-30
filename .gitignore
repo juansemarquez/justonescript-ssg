@@ -1,5 +1,6 @@
 .config.py
 output/
+deleted_posts
 __pycache__/
 *.pyc
 .venv

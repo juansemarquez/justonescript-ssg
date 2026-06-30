@@ -734,6 +734,51 @@ def collect_posts(cfg: dict) -> list[dict]:
     posts.sort(key=lambda p: p["pub_date"], reverse=True)
     return posts
 
+# ---------------------------------------------------------------------------
+# Check if there are previously built post that no longer have a .md file
+# ---------------------------------------------------------------------------
+
+def clean_orphaned_posts(cfg: dict, posts: list[dict]):
+    """Move .html files in output_dir that no longer have a matching .md file.
+    into deleted_posts."""
+    output_dir = Path(cfg.get("output_dir", "output"))
+    if not output_dir.exists():
+        return
+
+    deleted_dir = Path("deleted_posts")
+    valid_slugs = {p["slug"] for p in posts}
+
+    for html_file in output_dir.glob("*.html"):
+        if is_boilerplate(html_file.name, cfg):
+            continue
+        if html_file.name not in valid_slugs:
+            deleted_dir.mkdir(parents=True, exist_ok=True)
+            dest = deleted_dir / html_file.name
+            if dest.exists():
+                stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                dest = deleted_dir / f"{html_file.stem}.{stamp}.html"
+            shutil.move(str(html_file), str(dest))
+            # html_file.unlink()
+            print(f" moved orphaned {html_file.name} -> {dest}")
+
+# ---------------------------------------------------------------------------
+# Check if there are tags that have no posts tagged with it
+# ---------------------------------------------------------------------------
+def clean_orphaned_tags(cfg: dict, posts: list[dict]):
+    output_dir = Path(cfg.get("output_dir", "output"))
+    if not output_dir.exists():
+        return
+
+    current_tags = set()
+    for p in posts:
+        current_tags.update(p["tags"])
+
+    prefix = cfg["prefix_tags"]
+    for html_file in output_dir.glob(f"{prefix}*.html"):
+        tag_name = html_file.stem[len(prefix):]
+        if tag_name not in current_tags:
+            html_file.unlink()
+            print(f"  removed orphaned {html_file.name}")
 
 # ---------------------------------------------------------------------------
 # Build index.html
@@ -1013,8 +1058,13 @@ def cmd_build(cfg: dict, force: bool = False):
             changed_tags.update(p["tags"])
         else:
             print(f"  skipping {slug} (unchanged)")
+ 
+    print(f"\nBuilt {built} post(s).\n\nCleaning orphaned files...")
+    clean_orphaned_posts(cfg, posts)
+    print(f"\nCleaning orphaned tags...")
+    clean_orphaned_tags(cfg, posts)
 
-    print(f"\nBuilt {built} post(s). Rebuilding index, tags, RSS...")
+    print(f"\nRebuilding index, tags, RSS...")
     build_index(cfg, posts)
     build_all_posts(cfg, posts)
     build_tags(cfg, posts, changed_tags=changed_tags)
