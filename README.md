@@ -255,6 +255,13 @@ custom javascript files as you want via `js_include` in `.config.py`.
   [highlight.js](https://highlightjs.org/). I include the programming languages
 I use, but you can add/remove whatever you want.
 
+## Blog post
+
+You can read more about this project in my blog:
+
+- [Blog post in English](https://blog.juansemarquez.com/justonescript.html)
+- [Artículo en español](https://blog.juansemarquez.com/justonescript-ssg.html)
+
 ## License
 
 MIT License. See `LICENSE`.
