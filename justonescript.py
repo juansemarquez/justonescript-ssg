@@ -310,6 +310,8 @@ def build_site_header(cfg: dict) -> str:
         social += f'<a href="{cfg["twitter_account"]}" target="_blank" class="social" title="Twitter"><img src="img/twitter.png"></a>\n'
     if cfg.get("instagram_account"):
         social += f'<a href="{cfg["instagram_account"]}" target="_blank" class="social" title="Instagram"><img src="img/instagram.png"></a>\n'
+    if cfg.get("blog_feed"):
+        social += f'<a href="{cfg["blog_feed"]}" target="_blank" class="social" title="RSS"><img src="img/rss.png"></a>\n'
 
     return (
         '<div id="divbodyholder" class="md-cols-8 md-offset-2 lg-cols-6 lg-offset-6 cols-12">\n'
