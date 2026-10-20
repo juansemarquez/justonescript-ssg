@@ -47,6 +47,9 @@ non_blogpost_files=[]
 # feed file (rss in this case)
 blog_feed="feed.rss"
 number_of_feed_articles="10"
+# sitemap file. On "build" the existing file is updated in place, on
+# "rebuild" it is regenerated from scratch
+sitemap_file="sitemap.xml"
 # prefix for tags/categories files
 # please make sure that no other html file starts with this prefix
 prefix_tags="tag_"

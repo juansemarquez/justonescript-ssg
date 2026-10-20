@@ -20,9 +20,12 @@ import shutil
 import subprocess
 import sys
 import textwrap
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
+from urllib.parse import quote, unquote
+from xml.sax.saxutils import escape as xml_escape
 from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup # pip install beautifulsoup4
@@ -58,6 +61,7 @@ DEFAULTS = {
     "archive_index": "all_posts.html",
     "tags_index": "all_tags.html",
     "blog_feed": "feed.rss",
+    "sitemap_file": "sitemap.xml",
     "prefix_tags": "tag_",
     "header_file": "",
     "footer_file": "",
@@ -740,15 +744,16 @@ def collect_posts(cfg: dict) -> list[dict]:
 # Check if there are previously built post that no longer have a .md file
 # ---------------------------------------------------------------------------
 
-def clean_orphaned_posts(cfg: dict, posts: list[dict]):
+def clean_orphaned_posts(cfg: dict, posts: list[dict]) -> int:
     """Move .html files in output_dir that no longer have a matching .md file.
-    into deleted_posts."""
+    into deleted_posts. Returns how many files were moved."""
     output_dir = Path(cfg.get("output_dir", "output"))
     if not output_dir.exists():
-        return
+        return 0
 
     deleted_dir = Path("deleted_posts")
     valid_slugs = {p["slug"] for p in posts}
+    moved = 0
 
     for html_file in output_dir.glob("*.html"):
         if is_boilerplate(html_file.name, cfg):
@@ -762,25 +767,32 @@ def clean_orphaned_posts(cfg: dict, posts: list[dict]):
             shutil.move(str(html_file), str(dest))
             # html_file.unlink()
             print(f" moved orphaned {html_file.name} -> {dest}")
+            moved += 1
+    return moved
 
 # ---------------------------------------------------------------------------
 # Check if there are tags that have no posts tagged with it
 # ---------------------------------------------------------------------------
-def clean_orphaned_tags(cfg: dict, posts: list[dict]):
+def clean_orphaned_tags(cfg: dict, posts: list[dict]) -> int:
+    """Delete tag pages that no longer have any post with that tag.
+    Returns how many files were removed."""
     output_dir = Path(cfg.get("output_dir", "output"))
     if not output_dir.exists():
-        return
+        return 0
 
     current_tags = set()
     for p in posts:
         current_tags.update(p["tags"])
 
+    removed = 0
     prefix = cfg["prefix_tags"]
     for html_file in output_dir.glob(f"{prefix}*.html"):
         tag_name = html_file.stem[len(prefix):]
         if tag_name not in current_tags:
             html_file.unlink()
             print(f"  removed orphaned {html_file.name}")
+            removed += 1
+    return removed
 
 # ---------------------------------------------------------------------------
 # Build index.html
@@ -989,6 +1001,157 @@ def build_rss(cfg: dict, posts: list[dict]):
     print(f"  wrote {cfg['blog_feed']}")
 
 # ---------------------------------------------------------------------------
+# Build sitemap.xml
+# ---------------------------------------------------------------------------
+
+def fmt_date_sitemap(dt: datetime) -> str:
+    """W3C datetime as required by the sitemaps protocol."""
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
+
+def parse_w3c_datetime(raw: str) -> datetime | None:
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            dt = datetime.strptime(raw.strip(), fmt)
+        except ValueError:
+            continue
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    return None
+
+
+def load_sitemap_lastmods(path: Path) -> dict[str, datetime | None]:
+    """Parse an existing sitemap.xml into {url: lastmod} (lastmod None if absent)."""
+    entries: dict[str, datetime | None] = {}
+    if not path.exists():
+        return entries
+    try:
+        root = ET.fromstring(path.read_text(encoding="utf-8"))
+    except (ET.ParseError, OSError, UnicodeDecodeError) as e:
+        print(f"  WARNING: cannot parse existing {path.name} ({e}) — it will be regenerated.")
+        return entries
+    for el in root.iter():
+        if el.tag.rsplit("}", 1)[-1] != "url":
+            continue
+        loc, lastmod = "", ""
+        for child in el:
+            tag = child.tag.rsplit("}", 1)[-1]
+            if tag == "loc" and child.text:
+                loc = child.text.strip()
+            elif tag == "lastmod" and child.text:
+                lastmod = child.text.strip()
+        if loc:
+            entries[unquote(loc)] = parse_w3c_datetime(lastmod) if lastmod else None
+    return entries
+
+
+def build_sitemap(
+    cfg: dict,
+    posts: list[dict],
+    force: bool = False,
+    built_slugs: set[str] | None = None,
+    changed_tags: set[str] | None = None,
+    static_changed: bool = False,
+):
+    """
+    Write sitemap.xml listing every page of the site.
+
+    force=True  (rebuild): regenerate the file from scratch, ignoring any
+                          existing sitemap.xml.
+    force=False (build):   update the existing sitemap.xml, if any: keep
+                          <lastmod> of unchanged pages, refresh pages rebuilt
+                          in this run, add new pages and drop removed ones.
+                          If no sitemap.xml exists yet, one is created.
+    """
+    sitemap_file = cfg.get("sitemap_file", "sitemap.xml")
+    sitemap_path = out(cfg, sitemap_file)
+    built_slugs = built_slugs or set()
+    changed_tags = changed_tags or set()
+    base = cfg["global_url"].rstrip("/")
+    output_dir = Path(cfg.get("output_dir", "output"))
+    # The index page is the site root: list it as "domain.com/", not
+    # "domain.com/index.html"
+    index_url = f"{base}/"
+
+    if force:
+        # Regenerate from scratch: no history to preserve, every lastmod is
+        # re-derived from its source (pub_date / file mtime / now).
+        old = {}
+        built_slugs = set()
+        changed_tags = set()
+        static_changed = False
+    else:
+        old = load_sitemap_lastmods(sitemap_path)
+        # Migrate legacy ".../index.html" home entries to the root URL so
+        # their lastmod is preserved instead of looking like a new page
+        legacy_home = f"{base}/{cfg['index_file']}"
+        if legacy_home in old:
+            old.setdefault(index_url, old.pop(legacy_home, None))
+    now = datetime.now(tz=timezone.utc)
+
+    entries: dict[str, datetime] = {}
+
+    def lastmod_for(url: str, changed: bool, new_fresh: datetime, changed_fresh: datetime | None = None) -> datetime:
+        if url not in old:
+            return new_fresh
+        if changed:
+            return changed_fresh or now
+        return old[url] or new_fresh
+
+    def page_url(filename: str) -> str:
+        return index_url if filename == cfg["index_file"] else f"{base}/{filename}"
+
+    def add_page(filename: str, changed: bool, new_fresh: datetime, changed_fresh: datetime | None = None):
+        if not (output_dir / filename).exists():
+            return
+        url = page_url(filename)
+        entries.setdefault(url, lastmod_for(url, changed, new_fresh, changed_fresh))
+
+    # Boilerplate pages (rebuilt every run; only bump lastmod when the posts changed)
+    add_page(cfg["index_file"], static_changed, now)
+    add_page(cfg["archive_index"], static_changed, now)
+    add_page(cfg["tags_index"], static_changed, now)
+
+    # Tag pages
+    tags = {t for p in posts for t in p["tags"]}
+    for tag in sorted(tags):
+        add_page(f"{cfg['prefix_tags']}{tag}.html", tag in changed_tags, now)
+
+    # Posts: new ones get their pub_date, rebuilt ones get bumped to now
+    for p in posts:
+        add_page(p["slug"], p["slug"] in built_slugs, p["pub_date"])
+
+    # Manual static pages (about, contact, ...): lastmod = file mtime
+    non_posts = cfg.get("non_blogpost_files", [])
+    if isinstance(non_posts, str):
+        non_posts = non_posts.split()
+    for filename in non_posts:
+        path = output_dir / filename
+        if not path.exists():
+            continue
+        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+        prev = old.get(page_url(filename))
+        add_page(filename, prev is None or mtime > prev, mtime, mtime)
+
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>\n',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n',
+    ]
+    for url, dt in entries.items():
+        loc = xml_escape(quote(url, safe=":/?#[]@!$&'()*+,;="))
+        lines.append(f"<url><loc>{loc}</loc><lastmod>{fmt_date_sitemap(dt)}</lastmod></url>\n")
+    lines.append("</urlset>\n")
+    sitemap_path.write_text("".join(lines), encoding="utf-8")
+
+    added = sum(1 for u in entries if u not in old)
+    dropped = sum(1 for u in old if u not in entries)
+    if force:
+        print(f"  wrote {sitemap_file} ({len(entries)} urls, regenerated)")
+    else:
+        print(f"  wrote {sitemap_file} ({len(entries)} urls, +{added} new, -{dropped} dropped)")
+
+# ---------------------------------------------------------------------------
 # Copy assets to output file
 # ---------------------------------------------------------------------------
 
@@ -1031,6 +1194,7 @@ def cmd_build(cfg: dict, force: bool = False):
             print(f"  Git reports {len(changed_md)} changed/new .md file(s).")
 
     built = 0
+    built_slugs = set()
     changed_tags = set()
     for p in posts:
         slug = p["slug"]
@@ -1057,20 +1221,29 @@ def cmd_build(cfg: dict, force: bool = False):
                 p["pub_date"],
             )
             built += 1
+            built_slugs.add(slug)
             changed_tags.update(p["tags"])
         else:
             print(f"  skipping {slug} (unchanged)")
  
     print(f"\nBuilt {built} post(s).\n\nCleaning orphaned files...")
-    clean_orphaned_posts(cfg, posts)
+    moved_posts = clean_orphaned_posts(cfg, posts)
     print(f"\nCleaning orphaned tags...")
-    clean_orphaned_tags(cfg, posts)
+    removed_tags = clean_orphaned_tags(cfg, posts)
 
-    print(f"\nRebuilding index, tags, RSS...")
+    print(f"\nRebuilding index, tags, RSS, sitemap...")
     build_index(cfg, posts)
     build_all_posts(cfg, posts)
     build_tags(cfg, posts, changed_tags=changed_tags)
     build_rss(cfg, posts)
+    build_sitemap(
+        cfg,
+        posts,
+        force=force,
+        built_slugs=built_slugs,
+        changed_tags=changed_tags,
+        static_changed=bool(built_slugs) or moved_posts > 0 or removed_tags > 0,
+    )
     copy_assets(cfg)
     print("Done.")
 

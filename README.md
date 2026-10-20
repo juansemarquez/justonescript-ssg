@@ -10,6 +10,8 @@ frontmatter, and Git-based incremental builds.
 - Posts written in Markdown with a YAML-ish frontmatter block
 - Incremental builds: only regenerates posts that changed (via `git status`)
 - Generates index, tag pages, archive, and RSS feed
+- Generates `sitemap.xml`: `rebuild` regenerates it, `build` updates it in
+  place (keeps `lastmod` of unchanged pages, adds new ones, drops removed ones)
 - Configurable via a plain `.config.py` file
 - Cover images, excerpts, image credits
 - External JS support (including the share button)
